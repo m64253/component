@@ -1,11 +1,11 @@
 {
 	"name": "component",
+	"author": "Mikael Abrahamsson",
 	"version": "0.0.1",
-	"main": true,
 	"main" : "./component",
 	"scripts": {
 		"test": "make test"
-	}
+	},
 	"devDependencies": {
 		"mocha": "1.0.0"
 	}
