@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Component</title>
+	<link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+	<script src="../node_modules/mocha/mocha.js"></script>
+	<script>mocha.setup('bdd')</script>
+	<script src="../component.js"></script>
+	<script src="test.js"></script>
+	<script>
+		window.onload = mocha.run;
+	</script>
+</head>
+<body>
+
+<div id="mocha"></div>
+
+</body>
+</html>

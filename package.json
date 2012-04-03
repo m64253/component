@@ -1,0 +1,13 @@
+{
+	"name": "component",
+	"version": "0.0.1",
+	"private": true,
+	"main": true,
+	"main" : "./component",
+	"scripts": {
+		"test": "make test"
+	}
+	"devDependencies": {
+		"mocha": "1.0.0"
+	}
+}
