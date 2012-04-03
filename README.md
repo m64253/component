@@ -20,7 +20,7 @@ component.register('component-b', [ 'component-a' ], function (A) {
 			A.apply(this, arguments);
 		};
 	
-	tmp.prototype = Parent.prototype;
+	tmp.prototype = A.prototype;
 	
 	B.prototype = new tmp();
 	
