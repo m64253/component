@@ -1,5 +1,5 @@
 if (typeof module !== 'undefined') {
-	var component = require('./component');
+	var component = require('./../component');
 }
 
 
