@@ -2,14 +2,8 @@
 (function (root) {
 	"use strict";
 	
-	var component = {},
-	
-		// This object is used as an registr
-		REGISTRY = {},
-		
-		
-		// Since IE before 9 can't do indexOf on array's we need use this
-		indexOf = function (arr, value) {
+	// Since IE before 9 can't do indexOf on array's we need use this
+	var indexOf = function (arr, value) {
 			if (arr.indexOf) {
 				return arr.indexOf(value);
 			}
@@ -48,20 +42,20 @@
 		 * @param Array deps The dependencies of the component
 		 * @param Function builder The builder function of the component
 		 */
-		Builder = function (name, deps, builder) {
+		Builder = function (name, deps, builder, component) {
 			var callbacks = [],
 				// Start of in an non-running state
 				isRunning = false,
 				
-				// If the builder has same number of arguments as there are 
-				// dependencies we can asume it's a "sync" component
-				isSync = (builder.length === deps.length),
+				// If the number of dependencies are the same or greater then the number
+				// of arguments the builder extects it's a "sync" component
+				isSync = (deps.length >= builder.length),
 				
 				// The builder function's callback that will be called with built component
 				ready = function (comp) {
 					
 					// Put the component into the registry
-					REGISTRY[name] = comp;
+					component._REGISTRY[name] = comp;
 					
 					var len = callbacks.length,
 						i;
@@ -132,120 +126,127 @@
 					}
 				}
 			};
+		},
+		
+		component = {
+			/**
+			 * Check if a component is registered
+			 * @param String name The name of the component
+			 * @return Boolean
+			 */
+			isRegistered: function (name) {
+				if (!this._REGISTRY) {
+					this._REGISTRY = {};
+				}
+			
+				// If the registry has ths name as an property then it's registered
+				return this._REGISTRY.hasOwnProperty(name);
+			},
+		
+		
+			/**
+			 * Register a component
+			 * @param String name The name of the component
+			 * @param Array||Function deps An array of dependencies for this component requires or the component builder fucntion
+			 * @param Function||Array builder The component builder fucntion, if this component has dependcies
+			 */
+			register: function (name, deps, builder) {
+			
+				// Ensure we don't dubble register
+				if (this.isRegistered(name)) {
+					throw new Error('"' + name +'" already registered');
+				}
+			
+				// If we have a builder then ensure that the deps are at least an empty array
+				if (builder) {
+					deps = deps || [];
+				
+				// No builder then deps should be the builder
+				} else {
+					builder = deps;
+					deps = [];
+				}
+			
+				// Put the name, dependencies and the component builder in a custom object for later use
+				this._REGISTRY[name] = new Builder(name, deps, builder, this);
+			},
+		
+		
+			/**
+			 * Get components and then call a callback
+			 * 
+			 * @param Array keys The name all components that is needed
+			 * @param Function callback The callback that should be called after all components are ready
+			 * @param Object scope Optional Call the callback with this scope
+			 */
+			use: function (components, callback, scope) {
+			
+				if (components === '*') {
+					components = keys(this._REGISTRY || {});
+				}
+			
+				var args = [],
+					len = components.length,
+					isDoneNow = true,
+				
+					// Test if all components are ready, if so call the 
+					done = function () {
+						callback.apply(scope || callback, args);
+					},
+				
+					// Attempt to get component
+					self = this,
+					getComponent = function (name) {
+					
+						// Ensure we accually have this component registered
+						if (!self.isRegistered(name)) {
+							throw new Error('"' + name + '" in not registered');
+						}
+					
+						// Get index now and keep since we might need it later
+						var i = args.length,
+							comp = self._REGISTRY[name];
+						
+						// Check if async component
+						// TODO: The whole "instanceof" thing feels inadequate and lacking
+						if (comp instanceof Builder) {
+							// We need to wait on async component, so we can't be done now
+							isDoneNow = false;
+						
+							// Run async builder
+							comp.build(function () {
+							
+								// Set the "real" built component into the callback arguments
+								args[i] = self._REGISTRY[name];
+							
+								// If there are no dummy values in the array we're done!
+								if (indexOf(args, Builder) === -1) {
+									done();
+								}
+							});
+						
+							// Change to a unique dummy value for later look up
+							comp = Builder;
+						}
+					
+						// Set the component in the callback arguments
+						args[i] = comp;
+					},
+					i;
+				
+				// Loop over all required components
+				for (i = 0; i < len; i += 1) {
+					getComponent(components[i]);
+				}
+			
+				// Are we done now?
+				if (isDoneNow) {
+					// Ensure a-synchronicity
+					setTimeout(done, 0);
+				}
+			}
 		};
 	
-	
-	/**
-	 * Check if a component is registered
-	 * @param String name The name of the component
-	 * @return Boolean
-	 */
-	component.isRegistered = function (name) {
-		// If the registry has ths name as an property then it's registered
-		return REGISTRY.hasOwnProperty(name);
-	};
-		
-	
-	/**
-	 * Register a component
-	 * @param String name The name of the component
-	 * @param Array||Function deps An array of dependencies for this component requires or the component builder fucntion
-	 * @param Function||Array builder The component builder fucntion, if this component has dependcies
-	 */
-	component.register = function (name, deps, builder) {
-		
-		// Ensure we don't dubble register
-		if (component.isRegistered(name)) {
-			throw new Error('"' + name +'" already registered');
-		}
-		
-		// If we have a builder then ensure that the deps are at least an empty array
-		if (builder) {
-			deps = deps || [];
-			
-		// No builder then deps should be the builder
-		} else {
-			builder = deps;
-			deps = [];
-		}
-		
-		// Put the name, dependencies and the component builder in a custom object for later use
-		REGISTRY[name] = new Builder(name, deps, builder);
-	};
-	
-	
-	/**
-	 * Get components and then call a callback
-	 * 
-	 * @param Array keys The name all components that is needed
-	 * @param Function callback The callback that should be called after all components are ready
-	 * @param Object scope Optional Call the callback with this scope
-	 */
-	component.use = function (components, callback, scope) {
-		
-		if (components === '*') {
-			components = keys(REGISTRY);
-		}
-		
-		var args = [],
-			len = components.length,
-			isDoneNow = true,
-			
-			// Test if all components are ready, if so call the 
-			done = function () {
-				callback.apply(scope || callback, args);
-			},
-			
-			// Attempt to get component
-			getComponent = function (name) {
-				
-				// Ensure we accually have this component registered
-				if (!component.isRegistered(name)) {
-					throw new Error('"' + name + '" in not registered');
-				}
-				
-				// Get index now and keep since we might need it later
-				var i = args.length,
-					comp = REGISTRY[name];
-				
-				// Check if async component
-				// TODO: The whole "instanceof" thing feels inadequate and lacking
-				if (comp instanceof Builder) {
-					// We need to wait on async component, so we can't be done now
-					isDoneNow = false;
-					
-					// Run async builder
-					comp.build(function () {
-						
-						// Set the "real" built component into the callback arguments
-						args[i] = REGISTRY[name];
-						
-						// If there are no dummy values in the array we're done!
-						if (indexOf(args, Builder) === -1) {
-							done();
-						}
-					});
-					
-					// Change to a unique dummy value for later look up
-					comp = Builder;
-				}
-				
-				// Set the component in the callback arguments
-				args[i] = comp;
-			},
-			i;
-		
-		// Loop over all required components
-		for (i = 0; i < len; i += 1) {
-			getComponent(components[i]);
-		}
-		
-		// Are we done now?
-		if (isDoneNow) {
-			// Ensure a-synchronicity
-			setTimeout(done, 0);
-		}
-	};
 	
 	// 
 	if (typeof module !== 'undefined' && module.exports) {
