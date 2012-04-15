@@ -1,4 +1,4 @@
-/*globals module, setTimeout */
+/*globals module, setTimeout, clearTimeout */
 (function (root) {
 	"use strict";
 	
@@ -43,6 +43,16 @@
 		 * @param Function builder The builder function of the component
 		 */
 		Builder = function (name, deps, builder, component) {
+			if (typeof builder !== 'function') {
+				builder = (function (value) {
+					return function () {
+						return value;
+					};
+				}(builder));
+			}
+			
+			
+			
 			var callbacks = [],
 				// Start of in an non-running state
 				isRunning = false,
@@ -110,8 +120,6 @@
 							var args = Array.prototype.slice.call(arguments, 0);
 							
 							if (isSync) {
-								
-								// Call ready to set value
 								ready(builder.apply(builder, args));
 								
 							// It's a "async" component
@@ -151,7 +159,7 @@
 			 * @param Function||Array builder The component builder fucntion, if this component has dependcies
 			 */
 			register: function (name, deps, builder) {
-			
+				
 				// Ensure we don't dubble register
 				if (this.isRegistered(name)) {
 					throw new Error('"' + name +'" already registered');
@@ -169,6 +177,8 @@
 			
 				// Put the name, dependencies and the component builder in a custom object for later use
 				this._REGISTRY[name] = new Builder(name, deps, builder, this);
+				
+				return this;
 			},
 		
 		
@@ -183,19 +193,30 @@
 			
 				if (components === '*') {
 					components = keys(this._REGISTRY || {});
+				} else if (typeof components === 'string') {
+					components = [ components ];
 				}
 			
-				var args = [],
+				var self = this,
+					args = [],
 					len = components.length,
 					isDoneNow = true,
-				
+					
+					timer = setTimeout(function () {
+						if (root.console && root.console.log) {
+							root.console.log('USE - Still waiting after 10 seconds', components, args.map(function (arg) {
+								return (arg !== Builder);
+							}));
+						}
+					}, 10000),
+					
 					// Test if all components are ready, if so call the 
 					done = function () {
+						clearTimeout(timer);
 						callback.apply(scope || callback, args);
 					},
 				
 					// Attempt to get component
-					self = this,
 					getComponent = function (name) {
 					
 						// Ensure we accually have this component registered
@@ -212,7 +233,7 @@
 						if (comp instanceof Builder) {
 							// We need to wait on async component, so we can't be done now
 							isDoneNow = false;
-						
+							
 							// Run async builder
 							comp.build(function () {
 							
@@ -224,11 +245,11 @@
 									done();
 								}
 							});
-						
+							
 							// Change to a unique dummy value for later look up
 							comp = Builder;
 						}
-					
+						
 						// Set the component in the callback arguments
 						args[i] = comp;
 					},
@@ -238,12 +259,14 @@
 				for (i = 0; i < len; i += 1) {
 					getComponent(components[i]);
 				}
-			
+				
 				// Are we done now?
 				if (isDoneNow) {
 					// Ensure a-synchronicity
 					setTimeout(done, 0);
 				}
+				
+				return this;
 			}
 		};
 	

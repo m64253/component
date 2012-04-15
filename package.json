@@ -1,7 +1,7 @@
 {
 	"name": "component",
 	"author": "Mikael Abrahamsson",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"main" : "./component",
 	"scripts": {
 		"test": "make test"
