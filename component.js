@@ -2,7 +2,7 @@
 (function (root) {
 	"use strict";
 	
-	// Since IE before 9 can't do indexOf on array's we need use this
+	// Since IE before 9 can't do indexOf on array's we need to use this
 	var indexOf = function (arr, value) {
 			if (arr.indexOf) {
 				return arr.indexOf(value);
@@ -20,7 +20,7 @@
 			return -1;
 		},
 		
-		// Since older browser can't do Object.keys we need use this
+		// Since older browser can't do Object.keys we need to use this
 		keys = Object.keys || function (obj) {
 			
 			var keys = [],
@@ -37,10 +37,10 @@
 		
 		
 		/**
-		 * Private helper class to deal with compoents
-		 * @param String name The name of the component
-		 * @param Array deps The dependencies of the component
-		 * @param Function builder The builder function of the component
+		 * Private helper class to deal with components
+		 * @param {String} name The name of the component
+		 * @param {Array} deps The dependencies of the component
+		 * @param {Function} builder The builder function of the component
 		 */
 		Builder = function (name, deps, builder, component) {
 			if (typeof builder !== 'function') {
@@ -58,7 +58,7 @@
 				isRunning = false,
 				
 				// If the number of dependencies are the same or greater then the number
-				// of arguments the builder extects it's a "sync" component
+				// of arguments the builder expects it's a "sync" component
 				isSync = (deps.length >= builder.length),
 				
 				// The builder function's callback that will be called with built component
@@ -81,7 +81,7 @@
 			
 			/**
 			 * Builder function that taks an callback
-			 * @param Function callback A function that will be called when the componet is ready
+			 * @param {Function} callback A function that will be called when the componet is ready
 			 */
 			this.build = function (callback) {
 				// Save the callback for later
@@ -98,7 +98,7 @@
 						setTimeout(function () {
 							
 							// If the builder has same number of arguments as there are 
-							// dependencies we can asume it's a "sync" component
+							// dependencies we can assume it's a "sync" component
 							if (isSync) {
 								
 								// Call ready to set value
@@ -139,8 +139,8 @@
 		component = {
 			/**
 			 * Check if a component is registered
-			 * @param String name The name of the component
-			 * @return Boolean
+			 * @param {String} name The name of the component
+			 * @return {Boolean}
 			 */
 			isRegistered: function (name) {
 				if (!this._REGISTRY) {
@@ -154,9 +154,9 @@
 		
 			/**
 			 * Register a component
-			 * @param String name The name of the component
-			 * @param Array||Function deps An array of dependencies for this component requires or the component builder fucntion
-			 * @param Function||Array builder The component builder fucntion, if this component has dependcies
+			 * @param {String} name The name of the component
+			 * @param {Array|Function} deps An array of dependencies that this component requires or the component's' builder function
+			 * @param {Function|Array} builder The component builder function, if this component has dependencies
 			 */
 			register: function (name, deps, builder) {
 				
@@ -185,9 +185,9 @@
 			/**
 			 * Get components and then call a callback
 			 * 
-			 * @param Array keys The name all components that is needed
-			 * @param Function callback The callback that should be called after all components are ready
-			 * @param Object scope Optional Call the callback with this scope
+			 * @param {Array} keys The name all components that is needed
+			 * @param {Function} callback The callback that should be called after all components are ready
+			 * @param {Object} [scope] Call the callback with this scope
 			 */
 			use: function (components, callback, scope) {
 			
