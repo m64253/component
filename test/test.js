@@ -1,8 +1,6 @@
 if (typeof module !== 'undefined') {
-	var component = require('./../component');
+	component = require('./../component');
 }
-
-
 
 describe('#isRegistered()', function(){
 	before(function(){  

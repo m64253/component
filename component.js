@@ -38,6 +38,9 @@
 		
 		/**
 		 * Private helper class to deal with components
+		 * 
+		 * @private
+		 * @class Builder
 		 * @param {String} name The name of the component
 		 * @param {Array} deps The dependencies of the component
 		 * @param {Function} builder The builder function of the component
