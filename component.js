@@ -1,3 +1,4 @@
+/*jshint smarttabs:true */
 /*globals module, setTimeout, clearTimeout */
 (function (root) {
 	"use strict";
@@ -188,7 +189,7 @@
 			/**
 			 * Get components and then call a callback
 			 * 
-			 * @param {Array} keys The name all components that is needed
+			 * @param {Array} components The name all components that is needed
 			 * @param {Function} callback The callback that should be called after all components are ready
 			 * @param {Object} [scope] Call the callback with this scope
 			 */
