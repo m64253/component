@@ -82,8 +82,8 @@
 				};
 			
 			/**
-			 * Builder function that taks an callback
-			 * @param {Function} callback A function that will be called when the componet is ready
+			 * Builder function that takes an callback
+			 * @param {Function} callback A function that will be called when the component is ready
 			 */
 			this.build = function (callback) {
 				// Save the callback for later
@@ -221,7 +221,7 @@
 					// Attempt to get component
 					getComponent = function (name) {
 					
-						// Ensure we accually have this component registered
+						// Ensure we actually have this component registered
 						if (!self.isRegistered(name)) {
 							throw new Error('"' + name + '" in not registered');
 						}
