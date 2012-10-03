@@ -188,11 +188,13 @@
 			 * Get components and then call a callback
 			 * 
 			 * @param {Array|String} components The name all components that is needed
-			 * @param {Function} callback The callback that should be called after all components are ready
-			 * @param {Object} [scope] Call the callback with this scope
+			 * @param {Function} [callback] The callback that should be called after all components are ready
+			 * @param {Function} [ticker] Call the ticker every time a dependency has returned
 			 */
-			use: function (components, callback, scope) {
-			
+			use: function (components, callback, ticker) {
+				components = components || function () {};
+				ticker = ticker || function () {};
+				
 				if (components === '*') {
 					components = keys(this._REGISTRY || {});
 				} else if (typeof components === 'string') {
@@ -215,7 +217,7 @@
 					// Test if all components are ready, if so call the 
 					done = function () {
 						clearTimeout(timer);
-						callback.apply(scope || callback, args);
+						callback.apply(null, args);
 					},
 				
 					// Attempt to get component
@@ -224,6 +226,7 @@
 						// Ensure we actually have this component registered
 						if (!self.isRegistered(name)) {
 							throw new Error('"' + name + '" in not registered');
+							clearTimeout(timer);
 						}
 					
 						// Get index now and keep since we might need it later
@@ -238,17 +241,19 @@
 							
 							// Run async builder
 							comp.build(function () {
-							
+								
 								// Set the "real" built component into the callback arguments
 								args[i] = self._REGISTRY[name];
 							
 								// If there are no dummy values in the array we're done!
 								if (indexOf(args, Builder) === -1) {
 									done();
+								} else {
+									ticker(name);
 								}
 							});
 							
-							// Change to a unique dummy value for later look up
+							// Change to a "unique" dummy value for later look up
 							comp = Builder;
 						}
 						
