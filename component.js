@@ -244,12 +244,13 @@
 								
 								// Set the "real" built component into the callback arguments
 								args[i] = self._REGISTRY[name];
-							
+								
+								// Call the ticker with module name and value
+								ticker(name, args[i]);
+								
 								// If there are no dummy values in the array we're done!
 								if (indexOf(args, Builder) === -1) {
 									done();
-								} else {
-									ticker(name);
 								}
 							});
 							
