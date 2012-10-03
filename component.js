@@ -40,13 +40,12 @@
 		/**
 		 * Private helper class to deal with components
 		 * 
-		 * @private
-		 * @class Builder
 		 * @param {String} name The name of the component
-		 * @param {Array} deps The dependencies of the component
-		 * @param {Function} builder The builder function of the component
+		 * @param {Array} dependencies The dependencies of the component
+		 * @param {Function|Object} builder The builder function of the component
+		 * @param {Object} component
 		 */
-		Builder = function (name, deps, builder, component) {
+		Builder = function (name, dependencies, builder, component) {
 			if (typeof builder !== 'function') {
 				builder = (function (value) {
 					return function () {
@@ -56,14 +55,13 @@
 			}
 			
 			
-			
 			var callbacks = [],
 				// Start of in an non-running state
 				isRunning = false,
 				
 				// If the number of dependencies are the same or greater then the number
 				// of arguments the builder expects it's a "sync" component
-				isSync = (deps.length >= builder.length),
+				isSync = (dependencies.length >= builder.length),
 				
 				// The builder function's callback that will be called with built component
 				ready = function (comp) {
@@ -97,7 +95,7 @@
 					isRunning = true;
 					
 					// If there are no component dependencies we can call the builder right away
-					if (deps.length === 0) {
+					if (dependencies.length === 0) {
 						// Ensure a-synchronicity
 						setTimeout(function () {
 							
@@ -118,7 +116,7 @@
 					
 					} else {
 						// Get all component dependencies
-						component.use(deps, function () {
+						component.use(dependencies, function () {
 							
 							// Make arguments, component dependencies, into an array
 							var args = Array.prototype.slice.call(arguments, 0);
@@ -159,28 +157,28 @@
 			/**
 			 * Register a component
 			 * @param {String} name The name of the component
-			 * @param {Array|Function} deps An array of dependencies that this component requires or the component's' builder function
+			 * @param {Array|Function} dependencies An array of dependencies that this component requires or the component's' builder function
 			 * @param {Function|Array} builder The component builder function, if this component has dependencies
 			 */
-			register: function (name, deps, builder) {
+			register: function (name, dependencies, builder) {
 				
-				// Ensure we don't dubble register
+				// Ensure we don't double register
 				if (this.isRegistered(name)) {
 					throw new Error('"' + name +'" already registered');
 				}
 			
-				// If we have a builder then ensure that the deps are at least an empty array
+				// If we have a builder then ensure that the dependencies are at least an empty array
 				if (builder) {
-					deps = deps || [];
+					dependencies = dependencies || [];
 				
-				// No builder then deps should be the builder
+				// No builder then dependencies should be the builder
 				} else {
-					builder = deps;
-					deps = [];
+					builder = dependencies;
+					dependencies = [];
 				}
 			
 				// Put the name, dependencies and the component builder in a custom object for later use
-				this._REGISTRY[name] = new Builder(name, deps, builder, this);
+				this._REGISTRY[name] = new Builder(name, dependencies, builder, this);
 				
 				return this;
 			},
@@ -189,7 +187,7 @@
 			/**
 			 * Get components and then call a callback
 			 * 
-			 * @param {Array} components The name all components that is needed
+			 * @param {Array|String} components The name all components that is needed
 			 * @param {Function} callback The callback that should be called after all components are ready
 			 * @param {Object} [scope] Call the callback with this scope
 			 */
