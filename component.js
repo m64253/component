@@ -61,7 +61,7 @@
 				
 				// If the number of dependencies are the same or greater then the number
 				// of arguments the builder expects it's a "sync" component
-				isSync = (dependencies.length >= builder.length),
+				isSync = builder.length === 0 || (dependencies.length >= builder.length),
 				
 				// The builder function's callback that will be called with built component
 				ready = function (comp) {
@@ -76,6 +76,7 @@
 					for (i = 0; i < len; i += 1) {
 						callbacks[i].call(callbacks[i]);
 					}
+					callbacks = [];
 					
 					// These are not needed any more
 					callbacks = isRunning = null;
