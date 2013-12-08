@@ -85,6 +85,33 @@ describe('#use()', function(){
 		});
 		
 	});
+
+	describe('time named "sync"', function () {
+		it('"isRegistered" should not take any time', function(){
+			var time = (new Date()).getTime(),
+				dur;
+			if (component.isRegistered('sync') !== true) {
+				throw new Error('"sync", should be registered');
+			}
+			dur = (new Date()).getTime() - time;
+			if (dur > 0) {
+				throw new Error(dur + 'ms is to much time');
+			}
+		});
+		it('"use" should not take any time', function(done){
+			var time = (new Date()).getTime();
+			component.use(['sync'], function (bar) {
+				if (bar !== 'sync') {
+					throw new Error('"sync", should be "sync"');
+				}
+				var dur = (new Date()).getTime() - time;
+				if (dur > 16) {
+					throw new Error(dur + 'ms is to much time');
+				}
+				done();
+			});
+		})
+	});
 	
 	describe('Component named "sync"', function () {
 		it('"sync" should be registered', function(){
